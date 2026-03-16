@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>YASH POKLE // NASA MISSION CONTROL</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --green:#00ff41;
+  --green-dim:#00aa2a;
+  --green-dark:#004d14;
+  --amber:#ffb300;
+  --red:#ff3b3b;
+  --bg:#050805;
+  --panel:#070f07;
+  --border:rgba(0,255,65,0.2);
+  --text:#c8ffc8;
+  --muted:#3a7a3a;
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Share Tech Mono',monospace;
+  overflow-x:hidden;
+  cursor:crosshair;
+}
+
+/* SCANLINE OVERLAY */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* ═══ COD BOOT LOADER ═══ */
+#preloader{
+  position:fixed;inset:0;z-index:99999;
+  background:#000;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+/* Scanlines */
+#pl-scan{
+  position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.12) 2px,rgba(0,0,0,0.12) 4px);
+}
+/* Vignette */
+#pl-vig{
+  position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,0.75) 100%);
+}
+/* Top bar */
+#pl-top{
+  position:absolute;top:0;left:0;right:0;height:52px;
+  background:linear-gradient(180deg,rgba(0,0,0,0.95),transparent);
+  border-bottom:1px solid rgba(200,162,39,0.15);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;z-index:5;
+}
+.pl-top-class{
+  font-family:'Bebas Neue',sans-serif;font-size:10px;
+  letter-spacing:6px;color:rgba(160,20,20,0.85);
+}
+.pl-top-mid{
+  font-family:'Bebas Neue',sans-serif;font-size:11px;
+  letter-spacing:6px;color:rgba(200,162,39,0.45);
+}
+#pl-clock{
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  color:rgba(200,162,39,0.45);letter-spacing:2px;
+}
+/* Main center console */
+#pl-console{
+  position:absolute;
+  left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  width:min(560px,90vw);
+  z-index:5;
+}
+/* Operator block */
+#pl-operator{
+  border:1px solid rgba(200,162,39,0.15);
+  background:rgba(4,8,4,0.92);
+  padding:24px 28px;
+  position:relative;
+  margin-bottom:2px;
+}
+#pl-operator::before{
+  content:'';position:absolute;
+  top:0;left:28px;right:28px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(200,162,39,0.3),transparent);
+}
+.pl-fc{position:absolute;width:12px;height:12px;border-color:rgba(200,162,39,0.4);border-style:solid;}
+.pl-tl{top:-1px;left:-1px;border-width:2px 0 0 2px;}
+.pl-tr{top:-1px;right:-1px;border-width:2px 2px 0 0;}
+.pl-bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px;}
+.pl-br{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+.pl-op-label{
+  font-family:'Share Tech Mono',monospace;font-size:8px;
+  color:rgba(200,162,39,0.3);letter-spacing:4px;margin-bottom:10px;
+}
+.pl-op-name{
+  font-family:'Bebas Neue',sans-serif;font-size:42px;
+  color:rgba(200,162,39,0.85);letter-spacing:5px;line-height:1;
+  margin-bottom:4px;
+}
+.pl-op-role{
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  color:rgba(200,162,39,0.35);letter-spacing:3px;margin-bottom:14px;
+}
+.pl-op-stats{
+  display:flex;gap:0;border-top:1px solid rgba(200,162,39,0.08);
+  padding-top:12px;margin-top:4px;
+}
+.pl-stat{flex:1;border-right:1px solid rgba(200,162,39,0.06);}
+.pl-stat:last-child{border-right:none;}
+.pl-stat-label{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(200,162,39,0.25);letter-spacing:2px;margin-bottom:3px;}
+.pl-stat-val{font-family:'Bebas Neue',sans-serif;font-size:16px;color:rgba(200,162,39,0.6);letter-spacing:1px;}
+/* Boot terminal */
+#pl-terminal{
+  border:1px solid rgba(200,162,39,0.1);border-top:none;
+  background:rgba(2,5,2,0.95);
+  padding:14px 18px;
+  min-height:140px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;color:rgba(140,180,140,0.75);
+  line-height:1.85;letter-spacing:0.5px;
+  position:relative;
+}
+#pl-terminal-lines{margin-bottom:4px;}
+#pl-cursor{
+  display:inline-block;width:8px;height:12px;
+  background:rgba(0,255,65,0.7);
+  animation:plblink 0.9s step-end infinite;
+  vertical-align:middle;margin-left:2px;
+}
+@keyframes plblink{0%,100%{opacity:1;}50%{opacity:0;}}
+/* Progress bar */
+#pl-bar-wrap{
+  border:1px solid rgba(200,162,39,0.08);border-top:none;
+  background:rgba(0,0,0,0.8);
+  padding:12px 18px 14px;
+}
+#pl-bar-row{display:flex;justify-content:space-between;margin-bottom:6px;}
+#pl-bar-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(200,162,39,0.4);letter-spacing:2px;}
+#pl-bar-pct{font-family:'Bebas Neue',sans-serif;font-size:18px;color:rgba(200,162,39,0.75);letter-spacing:1px;}
+#pl-bar-outer{height:2px;background:rgba(200,162,39,0.07);position:relative;overflow:visible;}
+#pl-bar-fill{
+  height:100%;
+  background:linear-gradient(90deg,rgba(200,162,39,0.3),rgba(200,162,39,0.85));
+  width:0%;transition:width 0.18s linear;
+}
+#pl-bar-fill::after{
+  content:'';position:absolute;right:-1px;top:-3px;
+  width:2px;height:8px;
+  background:rgba(255,220,100,0.9);
+}
+/* Enter button */
+#pl-enter{
+  display:none;
+  width:100%;
+  font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:6px;
+  padding:13px;margin-top:2px;
+  background:transparent;color:rgba(200,162,39,0.8);
+  border:1px solid rgba(200,162,39,0.25);border-top:none;
+  cursor:pointer;
+  transition:all 0.2s;
+  animation:pl-pulse 2s ease infinite;
+}
+#pl-enter:hover{background:rgba(200,162,39,0.06);color:#fff;border-color:rgba(200,162,39,0.55);}
+@keyframes pl-pulse{0%,100%{box-shadow:0 0 0 0 rgba(200,162,39,0.06)}50%{box-shadow:0 0 0 6px rgba(200,162,39,0);}}
+/* Left / right side panels */
+#pl-left{
+  position:absolute;left:28px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:16px;z-index:5;
+  opacity:0;animation:plside 0.5s 0.3s ease forwards;
+}
+@keyframes plside{from{opacity:0;transform:translateY(-50%) translateX(-12px)}to{opacity:1;transform:translateY(-50%) translateX(0)}}
+#pl-right{
+  position:absolute;right:28px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:16px;z-index:5;align-items:flex-end;
+  opacity:0;animation:plsider 0.5s 0.4s ease forwards;
+}
+@keyframes plsider{from{opacity:0;transform:translateY(-50%) translateX(12px)}to{opacity:1;transform:translateY(-50%) translateX(0)}}
+.pl-side-item{border-left:2px solid rgba(200,162,39,0.15);padding-left:10px;}
+.pl-side-item-r{border-right:2px solid rgba(200,162,39,0.12);padding-right:10px;text-align:right;}
+.pls-label{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(200,162,39,0.25);letter-spacing:3px;margin-bottom:2px;}
+.pls-val{font-family:'Bebas Neue',sans-serif;font-size:15px;color:rgba(200,162,39,0.5);letter-spacing:2px;}
+.pls-val.g{color:rgba(0,255,65,0.55);}
+/* Bottom bar */
+#pl-bot{
+  position:absolute;bottom:0;left:0;right:0;
+  border-top:1px solid rgba(200,162,39,0.08);
+  background:rgba(0,0,0,0.6);
+  padding:8px 32px;z-index:5;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.pl-bot-item{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(200,162,39,0.2);letter-spacing:2px;}
+/* Audio btn */
+#pl-aud{
+  position:absolute;bottom:52px;right:28px;z-index:10;
+  font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;
+  padding:5px 10px;background:transparent;
+  color:rgba(200,162,39,0.25);border:1px solid rgba(200,162,39,0.08);
+  cursor:pointer;transition:all 0.2s;
+}
+#pl-aud:hover{color:rgba(200,162,39,0.55);border-color:rgba(200,162,39,0.25);}
+/* Glitch */
+.plglitch{animation:plglit 0.07s steps(1) 5;}
+@keyframes plglit{0%,100%{filter:none}33%{filter:invert(1) hue-rotate(90deg) brightness(2)}66%{filter:saturate(0) brightness(2.5)}}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:rgba(5,8,5,0.97);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  height:48px;
+}
+.nav-id{
+  font-family:'VT323',monospace;
+  font-size:22px;
+  color:var(--green);
+  letter-spacing:4px;
+}
+.nav-links{display:flex;gap:24px;list-style:none;}
+.nav-links a{
+  font-size:12px;color:var(--muted);
+  text-decoration:none;letter-spacing:2px;
+  transition:color 0.2s;cursor:pointer;
+}
+.nav-links a:hover{color:var(--green);}
+.nav-right{
+  display:flex;align-items:center;gap:12px;
+  font-size:11px;color:var(--green-dim);
+}
+.blink{animation:blink 1s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* HERO — MAIN CONSOLE */
+.hero{
+  min-height:100vh;
+  padding:80px 32px 40px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 60%, rgba(0,40,0,0.3) 0%, transparent 70%),
+    var(--bg);
+}
+.console-frame{
+  width:100%;max-width:900px;
+  border:1px solid var(--border);
+  padding:32px;
+  position:relative;
+  background:var(--panel);
+}
+.console-frame::before{
+  content:'NASA MISSION CONTROL // OPERATOR TERMINAL';
+  position:absolute;top:-10px;left:20px;
+  font-size:11px;color:var(--amber);
+  background:var(--bg);padding:0 8px;
+  letter-spacing:3px;
+}
+.frame-corner{position:absolute;width:16px;height:16px;border-color:var(--green);border-style:solid;}
+.fc-tl{top:-1px;left:-1px;border-width:2px 0 0 2px;}
+.fc-tr{top:-1px;right:-1px;border-width:2px 2px 0 0;}
+.fc-bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px;}
+.fc-br{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+
+.console-top{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:28px;gap:24px;flex-wrap:wrap;
+}
+.mission-patch{
+  width:100px;height:100px;
+  border-radius:50%;
+  border:2px solid var(--green-dim);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'VT323',monospace;
+  font-size:36px;
+  color:var(--green);
+  position:relative;
+  flex-shrink:0;
+  background:radial-gradient(circle,rgba(0,40,0,0.6),rgba(0,0,0,0.8));
+}
+.mission-patch::after{
+  content:'';position:absolute;inset:4px;
+  border-radius:50%;
+  border:1px dashed rgba(0,255,65,0.2);
+}
+.hero-main{flex:1;}
+.terminal-line{
+  font-family:'VT323',monospace;
+  font-size:14px;
+  color:var(--green-dim);
+  letter-spacing:3px;
+  margin-bottom:8px;
+}
+.hero-name{
+  font-family:'VT323',monospace;
+  font-size:clamp(48px,8vw,90px);
+  color:var(--green);
+  line-height:1;
+  text-shadow:0 0 20px rgba(0,255,65,0.4);
+  margin-bottom:4px;
+}
+.hero-designation{
+  font-size:13px;
+  color:var(--amber);
+  letter-spacing:4px;
+  margin-bottom:16px;
+}
+.hero-summary{
+  font-size:13px;
+  color:#6ab06a;
+  line-height:1.9;
+  max-width:520px;
+  border-left:2px solid var(--green-dark);
+  padding-left:16px;
+}
+.status-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:12px;margin-top:28px;
+}
+.status-item{
+  border:1px solid var(--border);
+  padding:10px 12px;
+  background:rgba(0,30,0,0.4);
+}
+.si-label{font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:4px;}
+.si-val{font-family:'VT323',monospace;font-size:22px;color:var(--green);}
+.si-val.amber{color:var(--amber);}
+.si-val.red{color:var(--red);}
+.btn-row{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;}
+.btn-terminal{
+  font-family:'Share Tech Mono',monospace;
+  font-size:12px;
+  letter-spacing:2px;
+  padding:10px 24px;
+  background:transparent;
+  color:var(--green);
+  border:1px solid var(--green);
+  cursor:pointer;
+  transition:all 0.2s;
+  text-transform:uppercase;
+}
+.btn-terminal:hover{background:rgba(0,255,65,0.1);box-shadow:0 0 12px rgba(0,255,65,0.2);}
+.btn-terminal.amber{color:var(--amber);border-color:var(--amber);}
+.btn-terminal.amber:hover{background:rgba(255,179,0,0.1);}
+
+/* TELEMETRY BAR */
+.telemetry{
+  display:flex;flex-wrap:wrap;gap:0;
+  border:1px solid var(--border);
+  margin-top:24px;
+  overflow:hidden;
+}
+.tel-cell{
+  flex:1;min-width:120px;
+  padding:8px 14px;
+  border-right:1px solid var(--border);
+}
+.tel-cell:last-child{border-right:none;}
+.tc-label{font-size:10px;color:var(--muted);letter-spacing:1px;}
+.tc-val{font-family:'VT323',monospace;font-size:18px;color:var(--green);}
+
+/* SECTION */
+.section{padding:60px 32px;max-width:960px;margin:0 auto;position:relative;z-index:1;}
+.section-header{
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:28px;
+}
+.sh-num{
+  font-family:'VT323',monospace;font-size:28px;
+  color:var(--green-dim);
+}
+.sh-title{
+  font-family:'VT323',monospace;font-size:26px;
+  color:var(--green);letter-spacing:4px;
+  text-transform:uppercase;
+}
+.sh-line{flex:1;height:1px;background:var(--border);}
+
+/* PERSONNEL FILE */
+.personnel-card{
+  border:1px solid var(--border);
+  padding:24px;
+  background:var(--panel);
+  display:grid;
+  grid-template-columns:160px 1fr;
+  gap:28px;
+  position:relative;
+}
+.personnel-card::before{
+  content:'[UNCLASSIFIED] PERSONNEL FILE';
+  position:absolute;top:-9px;left:16px;
+  font-size:10px;color:var(--green-dim);
+  background:var(--bg);padding:0 8px;letter-spacing:2px;
+}
+.scan-wrap{
+  display:flex;flex-direction:column;
+  align-items:center;gap:12px;
+}
+.scan-box{
+  width:120px;height:120px;
+  border:1px solid var(--green-dim);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  background:rgba(0,30,0,0.5);
+  overflow:hidden;
+}
+.scan-box::after{
+  content:'';
+  position:absolute;
+  left:0;right:0;
+  height:2px;
+  background:rgba(0,255,65,0.6);
+  animation:scan 3s linear infinite;
+}
+@keyframes scan{
+  0%{top:0;}100%{top:100%;}
+}
+.scan-initials{
+  font-family:'VT323',monospace;font-size:48px;
+  color:var(--green);z-index:1;
+}
+.scan-label{
+  font-size:10px;color:var(--green-dim);
+  letter-spacing:2px;text-align:center;
+}
+.personnel-data{}
+.pd-field{
+  display:flex;gap:12px;margin-bottom:8px;
+  border-bottom:1px solid rgba(0,255,65,0.06);
+  padding-bottom:8px;
+}
+.pd-key{
+  font-size:11px;color:var(--muted);
+  width:120px;flex-shrink:0;letter-spacing:1px;
+}
+.pd-val{font-size:12px;color:var(--text);}
+.pd-val.green{color:var(--green);}
+.pd-val.amber{color:var(--amber);}
+
+/* MISSION LOG TABLE */
+.mission-table{
+  width:100%;border-collapse:collapse;
+  border:1px solid var(--border);
+}
+.mission-table th{
+  font-size:11px;letter-spacing:2px;
+  color:var(--amber);
+  background:rgba(0,20,0,0.6);
+  padding:10px 14px;
+  text-align:left;
+  border-bottom:1px solid var(--border);
+}
+.mission-table td{
+  font-size:12px;
+  padding:12px 14px;
+  border-bottom:1px solid rgba(0,255,65,0.06);
+  vertical-align:top;
+  color:var(--text);
+}
+.mission-table tr:hover td{background:rgba(0,255,65,0.03);}
+.mission-id{color:var(--green-dim);font-size:11px;}
+.mission-name{color:var(--green);font-size:14px;font-family:'VT323',monospace;display:block;margin-bottom:4px;}
+.badge{
+  display:inline-block;
+  font-size:10px;padding:2px 8px;
+  letter-spacing:1px;
+}
+.badge-complete{background:rgba(0,255,65,0.1);color:#00ff41;border:1px solid rgba(0,255,65,0.3);}
+.badge-finalist{background:rgba(255,179,0,0.1);color:var(--amber);border:1px solid rgba(255,179,0,0.3);}
+.badge-active{background:rgba(0,180,255,0.1);color:#00aaff;border:1px solid rgba(0,180,255,0.3);}
+.tech-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.tech-tag{
+  font-size:10px;padding:2px 6px;
+  border:1px solid var(--border);
+  color:var(--muted);
+  letter-spacing:1px;
+}
+
+/* SYSTEMS STATUS (skills) */
+.systems-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+}
+.system-row{
+  border:1px solid var(--border);
+  padding:14px 16px;
+  background:var(--panel);
+}
+.srow-header{
+  display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:8px;
+}
+.srow-name{font-size:12px;letter-spacing:2px;color:var(--text);}
+.srow-pct{font-family:'VT323',monospace;font-size:20px;color:var(--green);}
+.srow-bar{height:4px;background:rgba(0,255,65,0.1);position:relative;}
+.srow-fill{height:100%;background:var(--green);transition:width 1.2s ease;}
+.srow-sys{font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:1px;}
+
+/* FLIGHT LOG */
+.flight-log{
+  border:1px solid var(--border);
+  background:var(--panel);
+  overflow:hidden;
+}
+.fl-header{
+  background:rgba(0,20,0,0.7);
+  padding:10px 16px;
+  border-bottom:1px solid var(--border);
+  font-size:11px;color:var(--amber);
+  letter-spacing:3px;
+  display:flex;justify-content:space-between;
+}
+.fl-entry{
+  padding:14px 16px;
+  border-bottom:1px solid rgba(0,255,65,0.06);
+  display:grid;
+  grid-template-columns:80px 120px 1fr;
+  gap:16px;
+  align-items:start;
+}
+.fl-entry:last-child{border-bottom:none;}
+.fl-seq{font-size:11px;color:var(--green-dim);}
+.fl-date{font-family:'VT323',monospace;font-size:16px;color:var(--amber);}
+.fl-event{font-size:12px;color:var(--text);line-height:1.7;}
+.fl-org{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:1px;}
+
+/* COMMS TERMINAL */
+.comms-panel{
+  border:1px solid var(--border);
+  padding:24px;
+  background:var(--panel);
+  position:relative;
+}
+.comms-panel::before{
+  content:'COMMS UPLINK // OPEN CHANNEL';
+  position:absolute;top:-9px;left:16px;
+  font-size:10px;color:var(--green);
+  background:var(--bg);padding:0 8px;letter-spacing:2px;
+}
+.comms-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:12px;margin-bottom:24px;
+}
+.comms-link{
+  display:flex;align-items:center;gap:12px;
+  padding:12px;
+  border:1px solid var(--border);
+  background:rgba(0,15,0,0.5);
+  cursor:pointer;
+  transition:all 0.2s;
+  text-decoration:none;
+}
+.comms-link:hover{border-color:var(--green);}
+.cl-code{
+  font-family:'VT323',monospace;font-size:20px;
+  color:var(--green);width:32px;text-align:center;
+}
+.cl-info{}
+.cl-type{font-size:10px;color:var(--muted);letter-spacing:2px;}
+.cl-val{font-size:12px;color:var(--text);}
+.form-row{display:flex;gap:12px;margin-bottom:12px;}
+.form-row input,.form-row textarea,.form-field input,.form-field textarea{
+  flex:1;
+  background:rgba(0,10,0,0.8);
+  border:1px solid var(--border);
+  color:var(--green);
+  font-family:'Share Tech Mono',monospace;
+  font-size:12px;
+  padding:10px 14px;
+  outline:none;
+  letter-spacing:1px;
+  width:100%;
+}
+.form-field{margin-bottom:12px;}
+.form-field textarea{min-height:80px;resize:vertical;}
+input::placeholder,textarea::placeholder{color:var(--muted);}
+input:focus,textarea:focus{border-color:var(--green);}
+.transmit-btn{
+  width:100%;
+  font-family:'Share Tech Mono',monospace;font-size:12px;
+  letter-spacing:3px;padding:14px;
+  background:transparent;color:var(--green);
+  border:1px solid var(--green);
+  cursor:pointer;text-transform:uppercase;
+  transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.transmit-btn:hover{background:rgba(0,255,65,0.08);box-shadow:0 0 16px rgba(0,255,65,0.15);}
+
+/* ACHIEVEMENTS */
+.achievements-list{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:12px;
+}
+.ach-card{
+  border:1px solid var(--border);
+  padding:16px;
+  background:var(--panel);
+  display:flex;gap:14px;align-items:flex-start;
+}
+.ach-icon{
+  font-family:'VT323',monospace;font-size:28px;
+  color:var(--amber);width:36px;flex-shrink:0;
+  text-align:center;
+}
+.ach-title{font-size:13px;color:var(--green);margin-bottom:4px;letter-spacing:1px;}
+.ach-detail{font-size:11px;color:var(--muted);line-height:1.6;}
+
+footer{
+  border-top:1px solid var(--border);
+  padding:20px 32px;
+  text-align:center;
+  font-size:11px;color:var(--muted);
+  letter-spacing:3px;
+  position:relative;z-index:1;
+}
+
+/* Fade in */
+.fade-in{opacity:0;transform:translateY(16px);transition:opacity 0.7s,transform 0.7s;}
+.fade-in.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:640px){
+  .personnel-card{grid-template-columns:1fr;}
+  .status-grid{grid-template-columns:repeat(2,1fr);}
+  .systems-grid{grid-template-columns:1fr;}
+  .fl-entry{grid-template-columns:60px 1fr;gap:8px;}
+  .fl-event-col{grid-column:1/-1;}
+  .comms-grid{grid-template-columns:1fr;}
+  .console-top{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<!-- COD BOOT LOADER -->
+<div id="preloader">
+  <div id="pl-scan"></div>
+  <div id="pl-vig"></div>
+
+  <!-- TOP BAR -->
+  <div id="pl-top">
+    <div class="pl-top-class">◆ CLASSIFIED // EYES ONLY ◆</div>
+    <div class="pl-top-mid">YASH POKLE // PORTFOLIO</div>
+    <div id="pl-clock">00:00:00</div>
+  </div>
+
+  <!-- SIDE PANELS -->
+  <div id="pl-left">
+    <div class="pl-side-item"><div class="pls-label">BASE</div><div class="pls-val">Nagpur, IND</div></div>
+    <div class="pl-side-item"><div class="pls-label">BATCH</div><div class="pls-val">2024–2028</div></div>
+    <div class="pl-side-item"><div class="pls-label">DSA</div><div class="pls-val">200+</div></div>
+    <div class="pl-side-item"><div class="pls-label">STATUS</div><div class="pls-val g">ACTIVE</div></div>
+  </div>
+  <div id="pl-right">
+    <div class="pl-side-item-r"><div class="pls-label">HARDWARE</div><div class="pls-val">ESP32 · ARD</div></div>
+    <div class="pl-side-item-r"><div class="pls-label">STACK</div><div class="pls-val">REACT · NODE</div></div>
+    <div class="pl-side-item-r"><div class="pls-label">HACKATHONS</div><div class="pls-val">2× FINALIST</div></div>
+    <div class="pl-side-item-r"><div class="pls-label">CLEARANCE</div><div class="pls-val" style="color:rgba(160,20,20,0.7)">ULTRA</div></div>
+  </div>
+
+  <!-- CENTER CONSOLE -->
+  <div id="pl-console">
+    <div id="pl-operator">
+      <div class="pl-fc pl-tl"></div><div class="pl-fc pl-tr"></div>
+      <div class="pl-fc pl-bl"></div><div class="pl-fc pl-br"></div>
+      <div class="pl-op-label">OPERATOR IDENTIFICATION</div>
+      <div class="pl-op-name">YASH POKLE</div>
+      <div class="pl-op-role">ELECTRONICS & COMPUTER SCIENCE // </div>
+      <div class="pl-op-stats">
+        <div class="pl-stat"><div class="pl-stat-label">UNIVERSITY</div><div class="pl-stat-val">RBU</div></div>
+        <div class="pl-stat"><div class="pl-stat-label">PROJECTS</div><div class="pl-stat-val">3 LOGGED</div></div>
+      </div>
+    </div>
+    <div id="pl-terminal">
+      <div id="pl-terminal-lines"></div>
+      <span id="pl-cursor"></span>
+    </div>
+    <div id="pl-bar-wrap">
+      <div id="pl-bar-row">
+        <div id="pl-bar-label">LOADING SYSTEMS...</div>
+        <div id="pl-bar-pct">0%</div>
+      </div>
+      <div id="pl-bar-outer"><div id="pl-bar-fill"></div></div>
+    </div>
+    <button id="pl-enter" onclick="enterPortfolio()">▶ ENTER DOSSIER</button>
+  </div>
+
+  <!-- BOTTOM STATUS -->
+  <div id="pl-bot">
+    <div class="pl-bot-item">Ramdeobaba University // Nagpur</div>
+    <div class="pl-bot-item">Electronics & Computer Science</div>
+    <div class="pl-bot-item">B.Tech 2024–2028</div>
+  </div>
+
+  <button id="pl-aud" onclick="togglePlAudio()">♪ SFX: ON</button>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-id">YASH // OPS-7744</div>
+  <ul class="nav-links">
+    <li><a onclick="navTo('personnel')">DOSSIER</a></li>
+    <li><a onclick="navTo('missions')">MISSIONS</a></li>
+    <li><a onclick="navTo('systems')">SYSTEMS</a></li>
+    <li><a onclick="navTo('flightlog')">FLIGHT LOG</a></li>
+    <li><a onclick="navTo('comms')">COMMS</a></li>
+  </ul>
+  <div class="nav-right">
+    <span class="blink">■</span>
+    <span id="nav-clock">00:00:00Z</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="console-frame">
+    <div class="frame-corner fc-tl"></div>
+    <div class="frame-corner fc-tr"></div>
+    <div class="frame-corner fc-bl"></div>
+    <div class="frame-corner fc-br"></div>
+
+    <div class="console-top">
+      <div class="mission-patch">YP</div>
+      <div class="hero-main">
+        <div class="terminal-line">> OPERATOR IDENTIFICATION VERIFIED</div>
+        <div class="hero-name">YASH POKLE</div>
+        <div class="hero-designation">ELECTRONICS & COMPUTER SCIENCE // EMBEDDED SYSTEMS ENGINEER</div>
+        <div class="hero-summary">
+          Undergraduate at Ramdeobaba University, Nagpur. Specialized in embedded systems, IoT, and full-stack development. Experienced with ESP32, Arduino, Raspberry Pi, and modern web stacks. 200+ DSA problems solved. Hackathon finalist. Building at the edge of hardware and software.
+        </div>
+      </div>
+    </div>
+
+    <div class="status-grid">
+      <div class="status-item">
+        <div class="si-label">CLEARANCE</div>
+        <div class="si-val amber">TOP SECRET</div>
+      </div>
+      <div class="status-item">
+        <div class="si-label">DSA PROBLEMS</div>
+        <div class="si-val">200+</div>
+      </div>
+      <div class="status-item">
+        <div class="si-label">MISSIONS</div>
+        <div class="si-val">5 LOGGED</div>
+      </div>
+      <div class="status-item">
+        <div class="si-label">STATUS</div>
+        <div class="si-val" style="color:#00ff41;">NOMINAL <span class="blink">_</span></div>
+      </div>
+    </div>
+
+    <div class="telemetry">
+      <div class="tel-cell"><div class="tc-label">BASE</div><div class="tc-val">Nagpur, IND</div></div>
+      <div class="tel-cell"><div class="tc-label">BATCH</div><div class="tc-val">2024–2028</div></div>
+      <div class="tel-cell"><div class="tc-label">SPECIALIZATION</div><div class="tc-val">Embedded + Software</div></div>
+      <div class="tel-cell"><div class="tc-label">LAST MISSION</div><div class="tc-val">Feb 2026</div></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-terminal" onclick="navTo('missions')">▶ VIEW MISSION LOG</button>
+      <button class="btn-terminal amber" onclick="navTo('comms')">◈ OPEN COMMS LINK</button>
+    </div>
+  </div>
+</section>
+
+<!-- PERSONNEL FILE -->
+<section class="section fade-in" id="personnel">
+  <div class="section-header">
+    <span class="sh-num">01//</span>
+    <span class="sh-title">OPERATOR DOSSIER</span>
+    <div class="sh-line"></div>
+  </div>
+  <div class="personnel-card">
+    <div class="scan-wrap">
+      <div class="scan-box">
+        <div class="scan-initials">YP</div>
+      </div>
+      <div class="scan-label">SCAN ACTIVE<br>PILOT VERIFIED</div>
+    </div>
+    <div class="personnel-data">
+      <div class="pd-field"><span class="pd-key">NAME:</span><span class="pd-val green">Yash Pokle</span></div>
+      <div class="pd-field"><span class="pd-key">PHONE:</span><span class="pd-val">+91 7744 982078</span></div>
+      <div class="pd-field"><span class="pd-key">INSTITUTION:</span><span class="pd-val">Ramdeobaba University, Nagpur</span></div>
+      <div class="pd-field"><span class="pd-key">PROGRAM:</span><span class="pd-val">B.Tech Electronics & Computer Science</span></div>
+      <div class="pd-field"><span class="pd-key">TENURE:</span><span class="pd-val amber">2024 – 2028</span></div>
+      <div class="pd-field"><span class="pd-key">SPECIALIZATION:</span><span class="pd-val">Embedded Systems, Robotics, Software Eng.</span></div>
+      <div class="pd-field"><span class="pd-key">LANGUAGES:</span><span class="pd-val">Java, C, MicroPython, JavaScript</span></div>
+      <div class="pd-field"><span class="pd-key">SYSTEMS:</span><span class="pd-val">ESP32, Arduino, Raspberry Pi, Git, MongoDB</span></div>
+      <div class="pd-field"><span class="pd-key">OBJECTIVE:</span><span class="pd-val">Research & development in robotics, semiconductors, and intelligent embedded systems.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- MISSIONS -->
+<section class="section fade-in" id="missions">
+  <div class="section-header">
+    <span class="sh-num">02//</span>
+    <span class="sh-title">MISSION LOG</span>
+    <div class="sh-line"></div>
+  </div>
+  <table class="mission-table">
+    <thead>
+      <tr>
+        <th>MISSION ID</th>
+        <th>DESIGNATION</th>
+        <th>OBJECTIVE</th>
+        <th>SYSTEMS</th>
+        <th>STATUS</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="mission-id">PRJ-001</td>
+        <td><span class="mission-name">Inventory Management</span>Hacksagon'25</td>
+        <td style="font-size:12px;line-height:1.7;">Full-stack inventory monitoring platform integrating hardware + software. ESP32 displays alerts on OLED. REST APIs with Node.js + MongoDB. AI-based recipe suggestions.</td>
+        <td><div class="tech-list"><span class="tech-tag">ESP32</span><span class="tech-tag">OLED</span><span class="tech-tag">Node.js</span><span class="tech-tag">MongoDB</span><span class="tech-tag">React</span></div></td>
+        <td><span class="badge badge-finalist">FINALIST</span></td>
+      </tr>
+      <tr>
+        <td class="mission-id">PRJ-002</td>
+        <td><span class="mission-name">Resume Builder</span>DevThon, KITS Ramtek</td>
+        <td style="font-size:12px;line-height:1.7;">Web app generating formatted resumes from user input. Dynamic frontend with React, backend services via Node.js.</td>
+        <td><div class="tech-list"><span class="tech-tag">React</span><span class="tech-tag">Node.js</span><span class="tech-tag">JavaScript</span></div></td>
+        <td><span class="badge badge-finalist">FINALIST</span></td>
+      </tr>
+      <tr>
+        <td class="mission-id">EXP-001</td>
+        <td><span class="mission-name">Java Developer Intern</span>Uptricks Services Pvt. Ltd.</td>
+        <td style="font-size:12px;line-height:1.7;">Built Library Management System with full CRUD operations for books and user records. Structured with OOP principles in Java.</td>
+        <td><div class="tech-list"><span class="tech-tag">Java</span><span class="tech-tag">OOP</span></div></td>
+        <td><span class="badge badge-complete">COMPLETE</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SYSTEMS STATUS -->
+<section class="section fade-in" id="systems">
+  <div class="section-header">
+    <span class="sh-num">03//</span>
+    <span class="sh-title">SYSTEMS STATUS</span>
+    <div class="sh-line"></div>
+  </div>
+  <div class="systems-grid" id="systems-grid"></div>
+</section>
+
+<!-- ACHIEVEMENTS -->
+<section class="section fade-in">
+  <div class="section-header">
+    <span class="sh-num">04//</span>
+    <span class="sh-title">COMMENDATIONS</span>
+    <div class="sh-line"></div>
+  </div>
+  <div class="achievements-list">
+    <div class="ach-card">
+      <div class="ach-icon">★</div>
+      <div><div class="ach-title">HACKSAGON'25 FINALIST</div><div class="ach-detail">ABV-IIITM Gwalior — Inventory Management System with hardware integration. Selected as finalist from national-level hackathon.</div></div>
+    </div>
+    <div class="ach-card">
+      <div class="ach-icon">★</div>
+      <div><div class="ach-title">DEVTHON FINALIST</div><div class="ach-detail">KITS Ramtek — Resume Builder web application. Recognized among top finalists at the institution-level hackathon.</div></div>
+    </div>
+    <div class="ach-card">
+      <div class="ach-icon">◈</div>
+      <div><div class="ach-title">200+ DSA PROBLEMS</div><div class="ach-detail">Solved 200+ Data Structures & Algorithms problems across platforms. Strong problem-solving foundation in competitive programming.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FLIGHT LOG -->
+<section class="section fade-in" id="flightlog">
+  <div class="section-header">
+    <span class="sh-num">05//</span>
+    <span class="sh-title">FLIGHT LOG</span>
+    <div class="sh-line"></div>
+  </div>
+  <div class="flight-log">
+    <div class="fl-header">
+      <span>SEQUENCE</span><span>DATE</span><span>EVENT</span>
+    </div>
+    <div class="fl-entry">
+      <span class="fl-seq">SEQ-004</span>
+      <span class="fl-date">2025.12–2026.02</span>
+      <div><div class="fl-event">Java Software Developer Intern — Uptricks Services Pvt. Ltd. Library Management System with full CRUD operations in Java.</div></div>
+    </div>
+    <div class="fl-entry">
+      <span class="fl-seq">SEQ-003</span>
+      <span class="fl-date">2025</span>
+      <div><div class="fl-event">Hacksagon'25 Finalist — ABV-IIITM Gwalior. Inventory Management platform with ESP32 hardware integration.</div></div>
+    </div>
+    <div class="fl-entry">
+      <span class="fl-seq">SEQ-002</span>
+      <span class="fl-date">2025</span>
+      <div><div class="fl-event">DevThon Finalist — KITS Ramtek. Resume Builder web application with React + Node.js.</div></div>
+    </div>
+    <div class="fl-entry">
+      <span class="fl-seq">SEQ-001</span>
+      <span class="fl-date">2024.08</span>
+      <div><div class="fl-event">Mission Initiated — Enrolled in B.Tech Electronics & Computer Science at Ramdeobaba University, Nagpur. Specialization: Embedded Systems, Robotics, Software Engineering.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMS -->
+<section class="section fade-in" id="comms">
+  <div class="section-header">
+    <span class="sh-num">06//</span>
+    <span class="sh-title">COMMS LINK</span>
+    <div class="sh-line"></div>
+  </div>
+  <div class="comms-panel">
+    <div class="comms-grid">
+      <div class="comms-link">
+        <div class="cl-code">@</div>
+        <div><div class="cl-type">EMAIL UPLINK</div><div class="cl-val">yashpokle@email.com</div></div>
+      </div>
+      <div class="comms-link">
+        <div class="cl-code">in</div>
+        <div><div class="cl-type">LINKEDIN</div><div class="cl-val">/in/yashpokle</div></div>
+      </div>
+      <div class="comms-link">
+        <div class="cl-code">&lt;/&gt;</div>
+        <div><div class="cl-type">GITHUB</div><div class="cl-val">github.com/yashpokle</div></div>
+      </div>
+      <div class="comms-link">
+        <div class="cl-code">◈</div>
+        <div><div class="cl-type">CODOLIO</div><div class="cl-val">codolio.com/yashpokle</div></div>
+      </div>
+    </div>
+    <div class="form-field"><input type="text" placeholder="SENDER IDENTIFICATION"/></div>
+    <div class="form-field"><input type="email" placeholder="TRANSMISSION FREQUENCY (EMAIL)"/></div>
+    <div class="form-field"><textarea placeholder="MESSAGE PAYLOAD..."></textarea></div>
+    <button class="transmit-btn">▶▶ TRANSMIT MESSAGE</button>
+  </div>
+</section>
+
+<footer>
+  CLASSIFIED // YASH POKLE PORTFOLIO // MISSION CONTROL TERMINAL // 2026 <span class="blink">_</span>
+</footer>
+
+<script>
+// ══════════════════════════════════════════
+// COD BOOT LOADER
+// ══════════════════════════════════════════
+
+// Clock in loader
+function updatePlClock(){
+  const n=new Date();
+  const h=String(n.getHours()).padStart(2,'0');
+  const m=String(n.getMinutes()).padStart(2,'0');
+  const s=String(n.getSeconds()).padStart(2,'0');
+  const el=document.getElementById('pl-clock');
+  if(el) el.textContent=`${h}:${m}:${s}`;
+}
+setInterval(updatePlClock,1000); updatePlClock();
+
+// Audio
+let plAudioCtx=null, plEngGain=null, plEngNodes=null, plAudioOn=true, plCurrVol=0;
+function initPlAudio(){
+  if(plAudioCtx)return;
+  plAudioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  plEngGain=plAudioCtx.createGain(); plEngGain.gain.value=0;
+  plEngGain.connect(plAudioCtx.destination);
+  // Low rumble
+  const r1=plAudioCtx.createOscillator(); r1.type='sawtooth'; r1.frequency.value=50;
+  const r1g=plAudioCtx.createGain(); r1g.gain.value=0.08; r1.connect(r1g); r1g.connect(plEngGain); r1.start();
+  // Mid whine
+  const r2=plAudioCtx.createOscillator(); r2.type='sawtooth'; r2.frequency.value=200;
+  const r2g=plAudioCtx.createGain(); r2g.gain.value=0.04; r2.connect(r2g); r2g.connect(plEngGain); r2.start();
+  // High whine
+  const r3=plAudioCtx.createOscillator(); r3.type='sine'; r3.frequency.value=1000;
+  const r3g=plAudioCtx.createGain(); r3g.gain.value=0.016; r3.connect(r3g); r3g.connect(plEngGain); r3.start();
+  // Noise
+  const bsz=2*plAudioCtx.sampleRate, buf=plAudioCtx.createBuffer(1,bsz,plAudioCtx.sampleRate);
+  const d=buf.getChannelData(0); for(let i=0;i<bsz;i++) d[i]=(Math.random()*2-1);
+  const ns=plAudioCtx.createBufferSource(); ns.buffer=buf; ns.loop=true;
+  const nf=plAudioCtx.createBiquadFilter(); nf.type='lowpass'; nf.frequency.value=160;
+  const ng=plAudioCtx.createGain(); ng.gain.value=0.13;
+  ns.connect(nf); nf.connect(ng); ng.connect(plEngGain); ns.start();
+  plEngNodes={r1,r2,r3};
+}
+function updatePlAudio(pct){
+  if(!plAudioCtx||!plEngGain)return;
+  const p=pct/100;
+  plCurrVol=p*0.55;
+  if(plAudioOn) plEngGain.gain.linearRampToValueAtTime(plCurrVol, plAudioCtx.currentTime+0.2);
+  plEngNodes.r1.frequency.linearRampToValueAtTime(50+p*80, plAudioCtx.currentTime+0.2);
+  plEngNodes.r2.frequency.linearRampToValueAtTime(200+p*400, plAudioCtx.currentTime+0.2);
+  plEngNodes.r3.frequency.linearRampToValueAtTime(1000+p*2000, plAudioCtx.currentTime+0.2);
+}
+function plBeep(f=700, dur=0.07){
+  if(!plAudioCtx)return;
+  const o=plAudioCtx.createOscillator(), g=plAudioCtx.createGain();
+  o.frequency.value=f; o.type='square';
+  g.gain.setValueAtTime(0.05, plAudioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, plAudioCtx.currentTime+dur);
+  o.connect(g); g.connect(plAudioCtx.destination);
+  o.start(); o.stop(plAudioCtx.currentTime+dur);
+}
+function togglePlAudio(){
+  if(!plAudioCtx) initPlAudio();
+  plAudioOn=!plAudioOn;
+  if(plEngGain) plEngGain.gain.value=plAudioOn?plCurrVol:0;
+  document.getElementById('pl-aud').textContent=plAudioOn?'♪ SFX: ON':'♪ SFX: OFF';
+}
+document.addEventListener('click', ()=>{ if(!plAudioCtx) initPlAudio(); }, {once:false});
+document.addEventListener('keydown', ()=>{ if(!plAudioCtx) initPlAudio(); }, {once:true});
+
+// Boot sequence
+const plBootLines=[
+  {t:'INITIALIZING SYSTEMS...', p:10},
+  {t:'LOADING OPERATOR DATABASE...', p:22},
+  {t:'VERIFYING CLEARANCE LEVEL...', p:34},
+  {t:'ESTABLISHING UPLINK...', p:46},
+  {t:'DECRYPTING ARCHIVES...', p:58},
+  {t:'ARMING NAVIGATION...', p:70},
+  {t:'RUNNING SYSTEM CHECKS...', p:84},
+  {t:'ALL SYSTEMS NOMINAL.', p:95},
+  {t:'> CLEARANCE GRANTED. WELCOME, YASH.', p:100},
+];
+let plBi=0, plLoadPct=0, plTargetPct=0;
+const plBarFill=document.getElementById('pl-bar-fill');
+const plBarLabel=document.getElementById('pl-bar-label');
+const plBarPct=document.getElementById('pl-bar-pct');
+const plTermLines=document.getElementById('pl-terminal-lines');
+
+// Smooth pct counter
+setInterval(()=>{
+  if(plLoadPct<plTargetPct){
+    plLoadPct=Math.min(plTargetPct, plLoadPct+0.6);
+    if(plBarFill) plBarFill.style.width=plLoadPct+'%';
+    if(plBarPct) plBarPct.textContent=Math.round(plLoadPct)+'%';
+    if(plAudioCtx) updatePlAudio(plLoadPct);
+  }
+},16);
+
+function nextPlBoot(){
+  if(plBi>=plBootLines.length)return;
+  const line=plBootLines[plBi];
+  plTargetPct=line.p;
+  if(plBarLabel) plBarLabel.textContent=line.t;
+  // Add line to terminal
+  if(plTermLines){
+    const row=document.createElement('div');
+    row.textContent=(plBi===plBootLines.length-1 ? line.t : '> '+line.t);
+    row.style.color=plBi===plBootLines.length-1?'rgba(0,255,65,0.8)':'rgba(140,180,140,0.7)';
+    if(plBi===plBootLines.length-1) row.style.marginTop='4px';
+    plTermLines.appendChild(row);
+    // Keep last 5 lines visible
+    const rows=plTermLines.querySelectorAll('div');
+    if(rows.length>6) rows[0].remove();
+  }
+  if(plAudioCtx) plBeep(400+plBi*50, 0.06);
+  plBi++;
+  if(plBi<plBootLines.length){
+    setTimeout(nextPlBoot, 480+Math.random()*340);
+  } else {
+    setTimeout(()=>{
+      document.getElementById('preloader').classList.add('plglitch');
+      if(plAudioCtx){ plBeep(1100,0.1); setTimeout(()=>plBeep(850,0.09),140); }
+      setTimeout(()=>{
+        const btn=document.getElementById('pl-enter');
+        if(btn) btn.style.display='block';
+        if(plBarLabel) plBarLabel.textContent='READY.';
+      },300);
+    },600);
+  }
+}
+setTimeout(nextPlBoot, 600);
+
+function enterPortfolio(){
+  if(plAudioCtx){
+    plBeep(600,0.05); setTimeout(()=>plBeep(900,0.09),80);
+    if(plEngGain) plEngGain.gain.linearRampToValueAtTime(0, plAudioCtx.currentTime+1.0);
+  }
+  const p=document.getElementById('preloader');
+  if(p){ p.style.transition='opacity 0.9s ease'; p.style.opacity='0'; setTimeout(()=>p.style.display='none',950); }
+}
+
+// Clock
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('nav-clock').textContent = `${h}:${m}:${s}`;
+}
+setInterval(updateClock, 1000); updateClock();
+
+// Nav
+function navTo(id) { document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); }
+
+// Skills
+const skills = [
+  {name:'REACT.JS // NODE.JS', sys:'WEB SYSTEMS', pct:85},
+  {name:'JAVA', sys:'CORE LANGUAGE', pct:80},
+  {name:'ESP32 // ARDUINO', sys:'EMBEDDED HARDWARE', pct:82},
+  {name:'C / MICROPYTHON', sys:'LOW-LEVEL SYSTEMS', pct:75},
+  {name:'MONGODB // REST APIs', sys:'DATA SYSTEMS', pct:78},
+  {name:'DSA // ALGORITHMS', sys:'COMPUTATION', pct:80},
+  {name:'RASPBERRY PI // IoT', sys:'EMBEDDED SYSTEMS', pct:72},
+  {name:'GIT // GITHUB', sys:'VERSION CONTROL', pct:88},
+];
+const sg = document.getElementById('systems-grid');
+skills.forEach(s => {
+  const d = document.createElement('div');
+  d.className = 'system-row';
+  d.innerHTML = `
+    <div class="srow-header"><span class="srow-name">${s.name}</span><span class="srow-pct">${s.pct}%</span></div>
+    <div class="srow-bar"><div class="srow-fill" data-pct="${s.pct}" style="width:0%"></div></div>
+    <div class="srow-sys">${s.sys}</div>`;
+  sg.appendChild(d);
+});
+
+// Intersection + bar animate
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      e.target.querySelectorAll('.srow-fill').forEach(bar => {
+        bar.style.width = bar.dataset.pct + '%';
+      });
+    }
+  });
+}, {threshold:0.15});
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
